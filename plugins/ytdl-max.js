@@ -1,98 +1,63 @@
 const config = require('../config');
-const { cmd } = require('../command');
-const yts = require('yt-search');
+const cmd = require('../command');
 
-cmd({
-    pattern: "video2",
-    alias: ["mp4", "song2"],
-    react: "🎥",
-    desc: "Download video from YouTube",
-    category: "download",
-    use: ".video <query>",
-    filename: __filename
-}, async (conn, m, mek, { from, q, reply }) => {
+// MP3 song download using David Cyril API
+cmd({ 
+    pattern: "playx", 
+    alias: ["play2", "song2"], 
+    react: "🎵", 
+    desc: "Download YouTube song using David Cyril API", 
+    category: "main", 
+    use: '.playx <song name>', 
+    filename: __filename 
+}, async (conn, mek, m, { from, sender, reply, q }) => { 
     try {
-        if (!q) return await reply("❌ Please provide a video name!");
+        if (!q) return reply("Please provide a song name to search.");
 
-        await reply("🔍 Searching for video...");
+        // Search using David Cyril API
+        const searchUrl = `https://apis.davidcyriltech.my.id/play?query=${encodeURIComponent(q)}`;
+        const searchRes = await fetch(searchUrl);
+        const searchData = await searchRes.json();
+
+        if (!searchData.status || !searchData.result) {
+            return reply("No results found or API error occurred.");
+        }
+
+        const song = searchData.result;
         
-        // Search YouTube for videos only
-        const search = await yts(q);
-        const videos = search.videos.filter(v => v.type === "video"); // Filter only videos, not channels
-        
-        if (!videos.length) return await reply("❌ No video results found!");
-        
-        const video = videos[0];
-        const videoUrl = video.url;
-        const title = video.title;
+        // Prepare the message
+        const ytmsg = `🎵 *Music Downloader*
+🎶 *Title:* ${song.title}
+⏳ *Duration:* ${song.duration}
+👀 *Views:* ${song.views}
+📅 *Published:* ${song.published}
+🔗 *Link:* ${song.video_url}
+> Powered By JawadTechX ❤️`;
 
-        await reply("⏳ Downloading video...");
-
-        // Use API to get video
-        const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(videoUrl)}`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (!data.success) return await reply("❌ Failed to download video!");
-
+        // Send audio with metadata
         await conn.sendMessage(from, {
-            video: { url: data.result.download_url },
-            mimetype: 'video/mp4',
-            caption: `*${title}*`
+            audio: { url: song.download_url },
+            mimetype: "audio/mpeg",
+            fileName: `${song.title}.mp3`,
+            contextInfo: {
+                externalAdReply: {
+                    title: song.title.length > 25 ? `${song.title.substring(0, 22)}...` : song.title,
+                    body: "Enjoy the music!",
+                    mediaType: 1,
+                    thumbnailUrl: song.thumbnail,
+                    sourceUrl: song.video_url,
+                    mediaUrl: song.video_url,
+                    showAdAttribution: true,
+                    renderLargerThumbnail: true
+                }
+            }
         }, { quoted: mek });
 
-        await reply(`✅ *${title}* downloaded successfully!`);
+        // Send song info as caption (optional)
+        await reply(ytmsg);
 
     } catch (error) {
         console.error(error);
-        await reply(`❌ Error: ${error.message}`);
-    }
-});
-
-cmd({
-    pattern: "play2",
-    alias: ["music", "song2"],
-    react: "🎵",
-    desc: "Download audio from YouTube",
-    category: "download",
-    use: ".play <query>",
-    filename: __filename
-}, async (conn, m, mek, { from, q, reply }) => {
-    try {
-        if (!q) return await reply("❌ Please provide a song name!");
-
-        await reply("🔍 Searching for song...");
-        
-        // Search YouTube for videos only
-        const search = await yts(q);
-        const videos = search.videos.filter(v => v.type === "video"); // Filter only videos, not channels
-        
-        if (!videos.length) return await reply("❌ No song results found!");
-        
-        const video = videos[0];
-        const videoUrl = video.url;
-        const title = video.title;
-
-        await reply("⏳ Downloading audio...");
-
-        // Use API to get audio
-        const apiUrl = `https://api.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(videoUrl)}`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (!data.success) return await reply("❌ Failed to download audio!");
-
-        await conn.sendMessage(from, {
-            audio: { url: data.result.download_url },
-            mimetype: 'audio/mpeg',
-            ptt: false,
-            fileName: `${title}.mp3`
-        }, { quoted: mek });
-
-        await reply(`✅ *${title}* downloaded successfully!`);
-
-    } catch (error) {
-        console.error(error);
-        await reply(`❌ Error: ${error.message}`);
+        reply("An error occurred. Please try again.");
     }
 });
