@@ -1,5 +1,5 @@
 const config = require('../config');
-const cmd = require('../command');
+const { cmd } = require('../command');
 
 // MP3 song download using David Cyril API
 cmd({ 
