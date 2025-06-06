@@ -111,7 +111,7 @@ const port = process.env.PORT || 9090;
   }
   });
   console.log('Plugins installed successful ✅')
-  console.log('Bot connected to whatsapp 🚀')
+  console.log('Bot connected to whatsapp ✅')
   
   let up = `╭─〔 *🤖 KHAN-MD BOT* 〕  
 ├─▸ *Ultra Super Fast Powerfull ⚠️*  
@@ -742,7 +742,7 @@ if (isBanned) return; // Ignore banned users completely
                         global.email
                     }\nitem2.X-ABLabel:GitHub\nitem3.URL:https://github.com/${
                         global.github
-                    }/khan-md\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${
+                    }/khan-xmd\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${
                         global.location
                     };;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
                 });
@@ -783,9 +783,9 @@ if (isBanned) return; // Ignore banned users completely
   }
   
   app.get("/", (req, res) => {
-  res.send("KHAN MD STARTED 🔰");
+  res.send("KHAN MD STARTED ✅");
   });
   app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
   setTimeout(() => {
   connectToWA()
-  }, 4000); 
+  }, 4000);
