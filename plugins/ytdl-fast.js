@@ -1,11 +1,11 @@
 const config = require('../config');
-const cmd = require('../command');
+const { cmd } = require('../command');
 const yts = require('yt-search');
 
 // MP4 video download
 cmd({ 
     pattern: "mp4", 
-    alias: ["video"], 
+    alias: ["video", "ytv", "yt"], 
     react: "🎥", 
     desc: "Download YouTube video", 
     category: "main", 
