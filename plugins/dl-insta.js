@@ -38,8 +38,7 @@ cmd({
       {
         [mediaType]: { url: data.downloadUrl },
         mimetype: isVideo ? "video/mp4" : "image/jpeg",
-        caption: `📥 *Instagram ${isVideo ? 'Video' : 'Image'} Downloaded*\n` +
-                 `> 🛠️ *Powerd By JawadTechX ♥️*`
+        caption: `> *Powerd By JawadTechX ♥️*`
       },
       { quoted: m }
     );
