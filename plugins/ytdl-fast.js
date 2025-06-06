@@ -1,9 +1,8 @@
 const config = require('../config');
-const { cmd } = require('../command');
-const { ytsearch } = require('@dark-yasiya/yt-dl.js');
+const cmd = require('../command');
+const yts = require('yt-search');
 
 // MP4 video download
-
 cmd({ 
     pattern: "mp4", 
     alias: ["video"], 
@@ -16,11 +15,11 @@ cmd({
     try { 
         if (!q) return await reply("Please provide a YouTube URL or video name.");
         
-        const yt = await ytsearch(q);
-        if (yt.results.length < 1) return reply("No results found!");
+        const { videos } = await yts(q);
+        if (!videos || videos.length < 1) return reply("No results found!");
         
-        let yts = yt.results[0];  
-        let apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(yts.url)}`;
+        let video = videos[0];  
+        let apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(video.url)}`;
         
         let response = await fetch(apiUrl);
         let data = await response.json();
@@ -30,11 +29,11 @@ cmd({
         }
 
         let ytmsg = `📹 *Video Downloader*
-🎬 *Title:* ${yts.title}
-⏳ *Duration:* ${yts.timestamp}
-👀 *Views:* ${yts.views}
-👤 *Author:* ${yts.author.name}
-🔗 *Link:* ${yts.url}
+🎬 *Title:* ${video.title}
+⏳ *Duration:* ${video.timestamp}
+👀 *Views:* ${video.views}
+👤 *Author:* ${video.author.name}
+🔗 *Link:* ${video.url}
 > Powered By JawadTechX ❤️`;
 
         // Send video directly with caption
@@ -55,7 +54,6 @@ cmd({
 });
 
 // MP3 song download 
-
 cmd({ 
     pattern: "song", 
     alias: ["play", "mp3"], 
@@ -68,10 +66,10 @@ cmd({
     try {
         if (!q) return reply("Please provide a song name or YouTube link.");
 
-        const yt = await ytsearch(q);
-        if (!yt.results.length) return reply("No results found!");
+        const { videos } = await yts(q);
+        if (!videos || videos.length < 1) return reply("No results found!");
 
-        const song = yt.results[0];
+        const song = videos[0];
         const apiUrl = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(song.url)}`;
         
         const res = await fetch(apiUrl);
@@ -79,23 +77,23 @@ cmd({
 
         if (!data?.result?.downloadUrl) return reply("Download failed. Try again later.");
 
-    await conn.sendMessage(from, {
-    audio: { url: data.result.downloadUrl },
-    mimetype: "audio/mpeg",
-    fileName: `${song.title}.mp3`,
-    contextInfo: {
-        externalAdReply: {
-            title: song.title.length > 25 ? `${song.title.substring(0, 22)}...` : song.title,
-            body: "Join our WhatsApp Channel",
-            mediaType: 1,
-            thumbnailUrl: song.thumbnail.replace('default.jpg', 'hqdefault.jpg'),
-            sourceUrl: 'https://whatsapp.com/channel/0029VatOy2EAzNc2WcShQw1j',
-            mediaUrl: 'https://whatsapp.com/channel/0029VatOy2EAzNc2WcShQw1j',
-            showAdAttribution: true,
-            renderLargerThumbnail: true
-        }
-    }
-}, { quoted: mek });
+        await conn.sendMessage(from, {
+            audio: { url: data.result.downloadUrl },
+            mimetype: "audio/mpeg",
+            fileName: `${song.title}.mp3`,
+            contextInfo: {
+                externalAdReply: {
+                    title: song.title.length > 25 ? `${song.title.substring(0, 22)}...` : song.title,
+                    body: "Join our WhatsApp Channel",
+                    mediaType: 1,
+                    thumbnailUrl: song.thumbnail.replace('default.jpg', 'hqdefault.jpg'),
+                    sourceUrl: 'https://whatsapp.com/channel/0029VatOy2EAzNc2WcShQw1j',
+                    mediaUrl: 'https://whatsapp.com/channel/0029VatOy2EAzNc2WcShQw1j',
+                    showAdAttribution: true,
+                    renderLargerThumbnail: true
+                }
+            }
+        }, { quoted: mek });
 
     } catch (error) {
         console.error(error);
